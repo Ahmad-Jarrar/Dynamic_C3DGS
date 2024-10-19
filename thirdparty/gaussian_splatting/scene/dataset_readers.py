@@ -1024,8 +1024,8 @@ def readCamerasfromJSON(path, jsonfile, white_background, duration=50):
 
         for f in range(frames):
             cam_ids = contents["cam_id"][f]
-            intrinsics = contents["k"][f]
-            w2c = contents["w2c"][f]
+            intrinsics = np.array(contents["k"][f])
+            w2c = np.array(contents["w2c"][f])
             image_paths = contents["fn"][f]
 
             for i in range(len(cam_ids)):
