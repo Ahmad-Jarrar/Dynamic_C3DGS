@@ -992,7 +992,7 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png", multiv
         # We create random points inside the bounds of the synthetic Blender scenes
         xyz = np.random.random((num_pts, 3)) * 2.6 - 1.3
         shs = np.random.random((num_pts, 3)) / 255.0
-        pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
+        pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)), times=np.zeros((num_pts, 1)))
 
         storePly(ply_path, xyz, SH2RGB(shs) * 255)
     try:
