@@ -1007,11 +1007,100 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png", multiv
                            ply_path=ply_path)
     return scene_info
 
+def readCamerasfromJSON(path, jsonfile, white_background, duration=50):
+    camera_infos = []
+
+    with open(os.path.join(path, jsonfile)) as json_file:
+        contents = json.load(json_file)
+        
+        height = contents["h"]
+        width = contents["w"]
+
+        frames = len(contents["cam_id"])
+
+        frames = min(frames, duration)
+
+        print(f"Reading {frames} frames")
+
+        for f in range(frames):
+            cam_ids = contents["cam_id"][f]
+            intrinsics = contents["k"][f]
+            w2c = contents["w2c"][f]
+            image_paths = contents["fn"][f]
+
+            for i in range(len(cam_ids)):
+                cam_id = cam_ids[i]
+                intr = intrinsics[i]
+                R = np.transpose(w2c[i][:3,:3])
+                T = -R @ w2c[i][:3,3]
+
+                image_path = os.path.join(path, "ims", image_paths[i])
+                image_name = image_paths[i].split("/")[1]
+                image = Image.open(image_path)
+
+                im_data = np.array(image.convert("RGBA"))
+
+                bg = np.array([1,1,1]) if white_background else np.array([0, 0, 0])
+
+                norm_data = im_data / 255.0
+                arr = norm_data[:,:,:3] * norm_data[:, :, 3:4] + bg * (1 - norm_data[:, :, 3:4])
+                image = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
+
+
+                FovX = 2 * np.arctan(width / (2 * intr[0, 0])) * 180 / np.pi
+                FovY = 2 * np.arctan(height / (2 * intr[1, 1])) * 180 / np.pi
+
+                near=0.01
+                far=100
+
+                cxr =   ((intr[0, 2] )/  width - 0.5)
+                cyr =   ((intr[1, 2] ) / height - 0.5)
+
+                timestamp = f / frames
+
+
+                camera_infos.append(CameraInfo(uid=cam_id, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
+                                image_path=image_path, image_name=image_name, width=width, height=height, 
+                                near=near, far=far, timestamp=timestamp, cxr=cxr, cyr=cyr))
+    return camera_infos
 
 
 
+def readPanopticInfo(path, white_background, eval, multiview=False, duration=50):
+    print("Reading Training Transforms")
+    train_cam_infos = readCamerasfromJSON(path, "train_meta.json", white_background, duration=duration)
+    print("Reading Test Transforms")
+    test_cam_infos = readCamerasfromJSON(path, "test_meta.json", white_background, duration=duration)
+    
+    if not eval:
+        train_cam_infos.extend(test_cam_infos)
+        test_cam_infos = []
 
+    nerf_normalization = getNerfppNorm(train_cam_infos)
 
+    ply_path = os.path.join(path, "points3d.ply")
+    if not os.path.exists(ply_path):
+        # Since this data set has no colmap data, we start with random points
+        num_pts = 100_000
+        print(f"Generating random point cloud ({num_pts})...")
+        
+        # We create random points inside the bounds of the synthetic Blender scenes
+        xyz = np.random.random((num_pts, 3)) * 2.6 - 1.3
+        shs = np.random.random((num_pts, 3)) / 255.0
+        pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
+
+        storePly(ply_path, xyz, SH2RGB(shs) * 255)
+    try:
+        pcd = fetchPly(ply_path)
+    except:
+        pcd = None
+
+    scene_info = SceneInfo(point_cloud=pcd,
+                           train_cameras=train_cam_infos,
+                           test_cameras=test_cam_infos,
+                           nerf_normalization=nerf_normalization,
+                           ply_path=ply_path)
+    return scene_info
 
 
 
@@ -1101,7 +1190,6 @@ def readColmapCamerasImmersivev2Testonly(cam_extrinsics, cam_intrinsics, images_
             cam_infos.append(cam_info)
     sys.stdout.write('\n')
     return cam_infos
-
 
 
 def readColmapCamerasImmersivev2(cam_extrinsics, cam_intrinsics, images_folder, near, far, startime=0, duration=50):
@@ -1196,6 +1284,7 @@ sceneLoadTypeCallbacks = {
     "Colmapmv": readColmapSceneInfoMv,
     "Blender" : readNerfSyntheticInfo, 
     "Technicolor": readColmapSceneInfoTechnicolor,
+    "Panoptic": readPanopticInfo,
 }
 
 
