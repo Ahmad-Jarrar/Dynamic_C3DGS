@@ -1101,7 +1101,7 @@ def readPanopticInfo(path, white_background, eval, multiview=False, duration=50)
         seg = npz[:, 6]
         pcd = BasicPointCloud(points=xyz, colors=rgb, normals=np.zeros((xyz.shape[0], 3)), times=np.zeros((xyz.shape[0], 1)))
 
-        storePly(ply_path, xyz, rgb * 255)
+        storePly(ply_path, np.concatenate((xyz, np.zeros((xyz.shape[0], 1))), axis=1), rgb * 255)
     
     try:
         pcd = fetchPly(ply_path)
