@@ -1061,7 +1061,7 @@ def readCamerasfromJSON(path, jsonfile, white_background, duration=50):
                 if f == 0:
                     cam_info = CameraInfo(uid=cam_id, R=R, T=T, FovY=FovY, FovX=FovX, image=image, image_path=image_path, image_name=image_name, width=width, height=height, near=near, far=far, timestamp=timestamp, pose=1, hpdirecitons=1, cxr=cxr, cyr=cyr)
                 else:
-                    cam_info = CameraInfo(uid=cam_id, R=R, T=T, FovY=FovY, FovX=FovX, image=image, image_path=image_path, image_name=image_name, width=width, height=height, near=near, far=far, timestamp=timestamp, pose=None, hpdirecitons=None, cxr=cxr, cyr=cyr)
+                    cam_info = CameraInfo(uid=cam_id, R=R, T=T, FovY=FovY, FovX=FovX, image=image, image_path=image_path, image_name=image_name, width=width, height=height, near=near, far=far, timestamp=timestamp, pose=1, hpdirecitons=1, cxr=cxr, cyr=cyr)
 
                 camera_infos.append(cam_info)
     return camera_infos
