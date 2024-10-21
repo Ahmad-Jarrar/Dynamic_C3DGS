@@ -1081,7 +1081,8 @@ def readPanopticInfo(path, white_background, eval, multiview=False, duration=50)
     nerf_normalization = getNerfppNorm(train_cam_infos)
 
     ply_path = os.path.join(path, "points3d.ply")
-    if not os.path.exists(ply_path):
+    npz_path = os.path.join(path, "init_pt_cld.npz")
+    if not os.path.exists(ply_path) and not os.path.exists(npz_path):
         # Since this data set has no colmap data, we start with random points
         num_pts = 100_000
         print(f"Generating random point cloud ({num_pts})...")
@@ -1092,6 +1093,16 @@ def readPanopticInfo(path, white_background, eval, multiview=False, duration=50)
         pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)), times=np.zeros((num_pts, 1)))
 
         storePly(ply_path, xyz, SH2RGB(shs) * 255)
+    elif os.path.exists(npz_path):
+        print("Reading point cloud from npz")
+        npz = np.load(npz_path)["data"]
+        xyz = npz[:, :3]
+        rgb = npz[:, 3:6]
+        seg = npz[:, 6]
+        pcd = BasicPointCloud(points=xyz, colors=rgb, normals=np.zeros((xyz.shape[0], 3)), times=np.zeros((xyz.shape[0], 1)))
+
+        storePly(ply_path, xyz, rgb * 255)
+    
     try:
         pcd = fetchPly(ply_path)
     except:
