@@ -1035,7 +1035,7 @@ def readCamerasfromJSON(path, jsonfile, white_background, duration=50):
                 T = -R @ w2c[i][:3,3]
 
                 image_path = os.path.join(path, "ims", image_paths[i])
-                image_name = image_paths[i].split("/")[1]
+                image_name = image_paths[i].split(".")[0]
                 image = Image.open(image_path)
 
                 im_data = np.array(image.convert("RGBA"))
