@@ -143,10 +143,10 @@ def train(dataset, opt, pipe, saving_iterations, debug_from, densify=0, duration
             midw =  int(viewpoint_cam.image_width/2)
             
             depth = render_pkg["depth"]
-            slectemask = depth != 15.0 
+            selectedmask = depth != 15.0 
 
-            validdepthdict[viewpoint_cam.image_name] = torch.median(depth[slectemask]).item()   
-            depthdict[viewpoint_cam.image_name] = torch.amax(depth[slectemask]).item() 
+            validdepthdict[viewpoint_cam.image_name] = torch.median(depth[selectedmask]).item()   
+            depthdict[viewpoint_cam.image_name] = torch.amax(depth[selectedmask]).item() 
     
     if densify == 1 or  densify == 2: 
         zmask = gaussians._xyz[:,2] < 4.5  
