@@ -75,7 +75,7 @@ def convertpanoptictocolmapdb(path, offset=0):
         
         colmapQ = rotmat2qvec(colmapR)
 
-        imageid = str(i + 1)
+        imageid = str(i)
         cameraid = imageid
         jpgname = imageid + ".jpg"  # Handle `.jpg`
         
@@ -89,11 +89,11 @@ def convertpanoptictocolmapdb(path, offset=0):
         
         model, width, height, params = i, W, H, np.array((k[0, 0], k[1,1], k[0,2], k[1,2]))
 
-        camera_id = db.add_camera(1, width, height, params, camera_id=i+1)
-        cameraline = f"{i + 1} PINHOLE {width} {height} {k[0, 0]} {k[1,1]} {k[0,2]} {k[1,2]}\n"
+        camera_id = db.add_camera(1, width, height, params, camera_id=i)
+        cameraline = f"{i} PINHOLE {width} {height} {k[0, 0]} {k[1,1]} {k[0,2]} {k[1,2]}\n"
         cameratxtlist.append(cameraline)
         
-        db.add_image(jpgname, camera_id, prior_q=colmapQ, prior_t=T, image_id=i+1)
+        db.add_image(jpgname, camera_id, prior_q=colmapQ, prior_t=T, image_id=i)
         db.commit()
         
 
