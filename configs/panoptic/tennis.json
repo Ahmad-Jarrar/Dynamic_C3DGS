@@ -10,7 +10,7 @@
   "desicnt": 12,
   "duration": 150,
   "rgbfunction": "sandwich",
-  "loader": "colmap",
+  "loader": "colmap_panoptic",
   "rdpip": "train_ours_full",
   "max_hashmap": 16,
   "rvq_size_geo": 256,
