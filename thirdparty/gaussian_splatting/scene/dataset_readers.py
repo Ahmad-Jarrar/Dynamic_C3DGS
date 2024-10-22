@@ -881,7 +881,7 @@ def readPanopticColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, nea
         # imageW = int (W//2)
       
     totalcamname = []
-    for idx, key in enumerate(cam_extrinsics): # first is cam20_ so we strictly sort by camera name
+    for idx, key in enumerate(cam_extrinsics):
         extr = cam_extrinsics[key]
         intr = cam_intrinsics[extr.camera_id]
         totalcamname.append(extr.name)
@@ -892,7 +892,7 @@ def readPanopticColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, nea
         sortednamedict[sortedtotalcamelist[i]] = i # map each cam with a number
      
 
-    for idx, key in enumerate(cam_extrinsics): # first is cam20_ so we strictly sort by camera name
+    for idx, key in enumerate(cam_extrinsics):
         sys.stdout.write('\r')
         # the exact output you're looking for:
         sys.stdout.write("Reading camera {}/{}".format(idx+1, len(cam_extrinsics)))
@@ -962,8 +962,8 @@ def readPanopticColmapInfo(path, images, eval, multiview=False, duration=50):
     parentdir = os.path.dirname(path)
     print("Parent dir: ", parentdir)
 
-    print("Camera extrinsics: ", cam_extrinsics)
-    print("Camera intrinsics: ", cam_intrinsics)
+    # print("Camera extrinsics: ", cam_extrinsics)
+    # print("Camera intrinsics: ", cam_intrinsics)
 
     near = 0.01
     far = 100
@@ -978,8 +978,10 @@ def readPanopticColmapInfo(path, images, eval, multiview=False, duration=50):
      
 
     if eval:
-        train_cam_infos =  cam_infos[duration:] 
-        test_cam_infos = cam_infos[:duration]
+        # train_cam_infos =  cam_infos[duration:] 
+        # test_cam_infos = cam_infos[:duration]
+        train_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid not in [0, 10, 15, 30]]
+        test_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid in [0, 10, 15, 30]]
         uniquecheck = []
         for cam_info in test_cam_infos:
             if cam_info.image_name not in uniquecheck:
