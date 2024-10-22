@@ -131,9 +131,9 @@ if __name__ == "__main__":
         folderpath = folderpath + "/"
 
     # Step 1: Prepare colmap input (skip frame extraction)
-    # print("Start preparing colmap image input")
-    # for offset in range(startframe, endframe):
-    #     preparecolmappanoptic(folderpath, offset)
+    print("Start preparing colmap image input")
+    for offset in range(startframe, endframe):
+        preparecolmappanoptic(folderpath, offset)
 
     # Step 2: Prepare colmap database input
     print("Start preparing colmap database input")

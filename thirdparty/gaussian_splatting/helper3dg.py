@@ -150,40 +150,44 @@ def getcolmapsinglen3d(folder, offset):
     if not os.path.exists(distortedmodel):
         os.makedirs(distortedmodel)
 
-    featureextract = "colmap feature_extractor --database_path " + dbfile+ " --image_path " + inputimagefolder
-
+    print("Running Feature Extractor")
+    print(f"colmap feature_extractor --database_path {dbfile} --image_path {inputimagefolder}")
+    featureextract = "colmap feature_extractor --database_path " + dbfile+ " --image_path " + f"\"{inputimagefolder}\""
     exit_code = os.system(featureextract)
     if exit_code != 0:
         exit(exit_code)
 
-
+    print("Running Exhaustive Matcher")
     featurematcher = "colmap exhaustive_matcher --database_path " + dbfile
     exit_code = os.system(featurematcher)
     if exit_code != 0:
         exit(exit_code)
 
+    print("Running Point Triangulator")
    # threshold is from   https://github.com/google-research/multinerf/blob/5b4d4f64608ec8077222c52fdf814d40acc10bc1/scripts/local_colmap_and_resize.sh#L62
-    triandmap = "colmap point_triangulator --database_path "+   dbfile  + " --image_path "+ inputimagefolder + " --output_path " + distortedmodel \
-    + " --input_path " + manualinputfolder + " --Mapper.ba_global_function_tolerance=0.000001"
+    triandmap = "colmap point_triangulator --database_path "+   dbfile  + " --image_path "+ f"\"{inputimagefolder}\"" + " --output_path " + f"\"{distortedmodel}\"" \
+    + " --input_path " + f"\"{manualinputfolder}\"" + " --Mapper.ba_global_function_tolerance=0.000001"
    
     exit_code = os.system(triandmap)
     if exit_code != 0:
        exit(exit_code)
     print(triandmap)
 
-
-    img_undist_cmd = "colmap" + " image_undistorter --image_path " + inputimagefolder + " --input_path " + distortedmodel  + " --output_path " + folder  \
+    print("Running Image Undistorter")
+    img_undist_cmd = "colmap" + " image_undistorter --image_path " + f"\"{inputimagefolder}\"" + " --input_path " + f"\"{distortedmodel}\""  + " --output_path " + f"\"{folder}\""  \
     + " --output_type COLMAP" 
     exit_code = os.system(img_undist_cmd)
     if exit_code != 0:
         exit(exit_code)
     print(img_undist_cmd)
-
-    removeinput = "rm -r " + inputimagefolder
+    
+    print("Removing Input Folder")
+    removeinput = "rm -r " + f"\"{inputimagefolder}\""
     exit_code = os.system(removeinput)
     if exit_code != 0:
         exit(exit_code)
 
+    print("Moving Files")
     files = os.listdir(folder + "/sparse")
     os.makedirs(folder + "/sparse/0", exist_ok=True)
     for file in files:
