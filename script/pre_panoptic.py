@@ -141,12 +141,12 @@ if __name__ == "__main__":
     # Step 1: Prepare colmap input (skip frame extraction)
     print("Start preparing colmap image input")
     for offset in range(startframe, endframe):
-        preparecolmappanoptic(os.path.join(folderpath, "ims"), offset)
+        preparecolmappanoptic(folderpath, offset)
 
     # Step 2: Prepare colmap database input
     print("Start preparing colmap database input")
     for offset in range(startframe, endframe):
-        convertpanoptictocolmapdb(os.path.join(folderpath, "ims"), offset)
+        convertpanoptictocolmapdb(folderpath, offset)
 
     # Step 3: Run colmap, per frame
     for offset in range(startframe, endframe):
