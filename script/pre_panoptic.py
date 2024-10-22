@@ -67,7 +67,6 @@ def convertpanoptictocolmapdb(path, offset=0):
             camera_info[cam_id] = (np.array(k), np.array(w2c))
         
     for i in range(len(camera_folders)):
-        print(f"Processing camera {i}")
         m = np.array(camera_info[i][1])
         colmapR = m[:3, :3]
         T = m[:3, 3]
@@ -94,7 +93,6 @@ def convertpanoptictocolmapdb(path, offset=0):
         cameraline = f"{i + 1} PINHOLE {width} {height} {k[0, 0]} {k[1,1]} {k[0,2]} {k[1,2]}\n"
         cameratxtlist.append(cameraline)
         
-        print(f"Adding image {jpgname} with camera {camera_id+1} and image id {i+1}")
         db.add_image(jpgname, camera_id, prior_q=colmapQ, prior_t=T, image_id=i+1)
         db.commit()
         
@@ -140,10 +138,9 @@ if __name__ == "__main__":
     # Step 2: Prepare colmap database input
     print("Start preparing colmap database input")
     for offset in range(startframe, endframe):
-        print("Start preparing colmap database input for frame ", offset)
         convertpanoptictocolmapdb(folderpath, offset)
 
     # Step 3: Run colmap, per frame
+    print("Start running colmap")
     for offset in range(startframe, endframe):
-        print("Start running colmap for frame ", offset)
         getcolmapsinglen3d(folderpath, offset)
