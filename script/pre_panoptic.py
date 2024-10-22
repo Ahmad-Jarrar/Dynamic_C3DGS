@@ -11,19 +11,14 @@ from thirdparty.gaussian_splatting.helper3dg import getcolmapsinglen3d
 import json
 
 def preparecolmappanoptic(folder, offset=0):
-    # Only process folders inside `ims` and exclude `seg`
     folderlist = sorted(glob.glob(os.path.join(folder, "ims", "*/")))
-    imagelist = []
-    savedir = os.path.join(folder, "colmap_" + str(offset))
-    if not os.path.exists(savedir):
-        os.mkdir(savedir)
-    savedir = os.path.join(savedir, "input")
-    if not os.path.exists(savedir):
-        os.mkdir(savedir)
+    savedir = os.path.join(folder, "colmap_" + str(offset), "input")
+    os.makedirs(savedir, exist_ok=True)
 
     for camera_folder in folderlist:
-        imagepath = os.path.join(camera_folder, f"{str(offset).zfill(6)}.jpg")  # Handle `.jpg`
-        imagesavepath = os.path.join(savedir, camera_folder.split("/")[-2] + ".jpg")  # Save as `.jpg`
+        camera_id = camera_folder.split("/")[-2]  # Extract camera folder name (e.g., 0, 1, 2)
+        imagepath = os.path.join(folder, "ims", camera_id, f"{str(offset).zfill(6)}.jpg")  # Correct path
+        imagesavepath = os.path.join(savedir, camera_id + ".jpg")  # Save as `.jpg`
 
         if os.path.exists(imagepath):
             shutil.copy(imagepath, imagesavepath)
@@ -62,13 +57,13 @@ def convertpanoptictocolmapdb(path, offset=0):
         train_meta = json.load(f)
         H, W = train_meta["h"], train_meta["w"]
 
-        for cam_id, k, w2c in zip(train_meta["cam_id"], train_meta["k"], train_meta["w2c"]):
+        for cam_id, k, w2c in zip(train_meta["cam_id"][offset], train_meta["k"][offset], train_meta["w2c"][offset]):
             camera_info[cam_id] = (k, w2c)
 
     with open(test_meta, "r") as f:
         test_meta = json.load(f)
 
-        for cam_id, k, w2c in zip(test_meta["cam_id"], test_meta["k"], test_meta["w2c"]):
+        for cam_id, k, w2c in zip(test_meta["cam_id"][offset], test_meta["k"][offset], test_meta["w2c"][offset]):
             camera_info[cam_id] = (np.array(k), np.array(w2c))
         
 
