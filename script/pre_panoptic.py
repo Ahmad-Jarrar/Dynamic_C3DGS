@@ -69,12 +69,11 @@ def convertpanoptictocolmapdb(path, offset=0):
 
     for i in range(len(camera_info.keys())):
         cameraname = os.path.basename(camera_folders[i])[:-1]  # Remove trailing slash
-        m = camera_info[i][1]
+        m = np.array(camera_info[i][1])
         colmapR = m[:3, :3]
         T = m[:3, 3]
 
-        k = camera_info[i][0]
-        
+        k = np.array(camera_info[i][0])
         
         colmapQ = rotmat2qvec(colmapR)
 
@@ -134,9 +133,9 @@ if __name__ == "__main__":
         folderpath = folderpath + "/"
 
     # Step 1: Prepare colmap input (skip frame extraction)
-    print("Start preparing colmap image input")
-    for offset in range(startframe, endframe):
-        preparecolmappanoptic(folderpath, offset)
+    # print("Start preparing colmap image input")
+    # for offset in range(startframe, endframe):
+    #     preparecolmappanoptic(folderpath, offset)
 
     # Step 2: Prepare colmap database input
     print("Start preparing colmap database input")
