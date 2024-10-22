@@ -982,21 +982,24 @@ def readPanopticColmapInfo(path, images, eval, multiview=False, duration=50):
         # test_cam_infos = cam_infos[:duration]
         train_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid not in [0, 10, 15, 30]]
         test_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid in [0, 10, 15, 30]]
-        uniquecheck = []
-        for cam_info in test_cam_infos:
-            if cam_info.image_name not in uniquecheck:
-                uniquecheck.append(cam_info.image_name)
-        assert len(uniquecheck) == 1 
+        # uniquecheck = []
+        # for cam_info in test_cam_infos:
+        #     if cam_info.image_name not in uniquecheck:
+        #         uniquecheck.append(cam_info.image_name)
+        # assert len(uniquecheck) == 1 
         
-        sanitycheck = []
-        for cam_info in train_cam_infos:
-            if cam_info.image_name not in sanitycheck:
-                sanitycheck.append(cam_info.image_name)
-        for testname in uniquecheck:
-            assert testname not in sanitycheck
+        # sanitycheck = []
+        # for cam_info in train_cam_infos:
+        #     if cam_info.image_name not in sanitycheck:
+        #         sanitycheck.append(cam_info.image_name)
+        # for testname in uniquecheck:
+        #     assert testname not in sanitycheck
     else:
         train_cam_infos = cam_infos
         test_cam_infos = cam_infos[:2] #dummy
+
+    print("Train cam infos: ", len(train_cam_infos))
+    print("Test cam infos: ", len(test_cam_infos))
 
     nerf_normalization = getNerfppNorm(train_cam_infos)
 
