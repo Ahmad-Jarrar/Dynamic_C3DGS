@@ -68,7 +68,6 @@ def convertpanoptictocolmapdb(path, offset=0):
         
     for i in range(len(camera_folders)):
         print(f"Processing camera {i}")
-        cameraname = os.path.basename(camera_folders[i])[:-1]  # Remove trailing slash
         m = np.array(camera_info[i][1])
         colmapR = m[:3, :3]
         T = m[:3, 3]
@@ -79,7 +78,7 @@ def convertpanoptictocolmapdb(path, offset=0):
 
         imageid = str(i + 1)
         cameraid = imageid
-        jpgname = cameraname + ".jpg"  # Handle `.jpg`
+        jpgname = imageid + ".jpg"  # Handle `.jpg`
         
         line = imageid + " "
         line += " ".join(map(str, colmapQ)) + " "
@@ -91,12 +90,12 @@ def convertpanoptictocolmapdb(path, offset=0):
         
         model, width, height, params = i, W, H, np.array((k[0, 0], k[1,1], k[0,2], k[1,2]))
 
-        camera_id = db.add_camera(1, width, height, params, camera_id=i)
+        camera_id = db.add_camera(1, width, height, params, camera_id=i+1)
         cameraline = f"{i + 1} PINHOLE {width} {height} {k[0, 0]} {k[1,1]} {k[0,2]} {k[1,2]}\n"
         cameratxtlist.append(cameraline)
         
-        print(f"Adding image {jpgname} with camera {camera_id} and image id {i}")
-        db.add_image(jpgname, camera_id, prior_q=colmapQ, prior_t=T, image_id=i)
+        print(f"Adding image {jpgname} with camera {camera_id+1} and image id {i+1}")
+        db.add_image(jpgname, camera_id, prior_q=colmapQ, prior_t=T, image_id=i+1)
         db.commit()
         
 
