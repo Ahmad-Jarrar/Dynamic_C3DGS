@@ -8,6 +8,7 @@ sys.path.append(".")
 from thirdparty.gaussian_splatting.utils.my_utils import posetow2c_matrcs, rotmat2qvec
 from thirdparty.colmap.pre_colmap import * 
 from thirdparty.gaussian_splatting.helper3dg import getcolmapsinglen3d
+import json
 
 def preparecolmappanoptic(folder, offset=0):
     # Only process folders inside `ims` and exclude `seg`
@@ -30,7 +31,11 @@ def preparecolmappanoptic(folder, offset=0):
             print(f"Image {imagepath} not found. Skipping.")
 
 def convertpanoptictocolmapdb(path, offset=0):
-    originnumpy = os.path.join(path, "poses_bounds.npy")
+    # originnumpy = os.path.join(path, "poses_bounds.npy")
+    train_meta = os.path.join(path, "train_meta.json")
+    test_meta = os.path.join(path, "test_meta.json")
+
+
     camera_folders = sorted(glob.glob(os.path.join(path, 'ims', '*/')))  # Camera folders inside 'ims'
     projectfolder = os.path.join(path, "colmap_" + str(offset))
     manualfolder = os.path.join(projectfolder, "manual")
@@ -50,44 +55,55 @@ def convertpanoptictocolmapdb(path, offset=0):
     db = COLMAPDatabase.connect(os.path.join(projectfolder, "input.db"))
     db.create_tables()
 
-    with open(originnumpy, 'rb') as numpy_file:
-        poses_bounds = np.load(numpy_file)
-        poses = poses_bounds[:, :15].reshape(-1, 3, 5)
+    camera_info = {}
+    H, W = 0, 0
 
-        llffposes = poses.copy().transpose(1, 2, 0)
-        w2c_matriclist = posetow2c_matrcs(llffposes)
-        assert isinstance(w2c_matriclist, list)
+    with open(train_meta, "r") as f:
+        train_meta = json.load(f)
+        H, W = train_meta["h"], train_meta["w"]
 
-        for i in range(len(poses)):
-            cameraname = os.path.basename(camera_folders[i])[:-1]  # Remove trailing slash
-            m = w2c_matriclist[i]
-            colmapR = m[:3, :3]
-            T = m[:3, 3]
-            
-            H, W, focal = poses[i, :, -1]
-            
-            colmapQ = rotmat2qvec(colmapR)
+        for cam_id, k, w2c in zip(train_meta["cam_id"], train_meta["k"], train_meta["w2c"]):
+            camera_info[cam_id] = (k, w2c)
 
-            imageid = str(i + 1)
-            cameraid = imageid
-            jpgname = cameraname + ".jpg"  # Handle `.jpg`
-            
-            line = imageid + " "
-            line += " ".join(map(str, colmapQ)) + " "
-            line += " ".join(map(str, T)) + " "
-            line += cameraid + " " + jpgname + "\n"
-            imagetxtlist.append(line)
-            imagetxtlist.append("\n")
+    with open(test_meta, "r") as f:
+        test_meta = json.load(f)
 
-            focolength = focal
-            model, width, height, params = i, W, H, np.array((focolength, focolength, W // 2, H // 2))
+        for cam_id, k, w2c in zip(test_meta["cam_id"], test_meta["k"], test_meta["w2c"]):
+            camera_info[cam_id] = (np.array(k), np.array(w2c))
+        
 
-            camera_id = db.add_camera(1, width, height, params)
-            cameraline = f"{i + 1} PINHOLE {width} {height} {focolength} {focolength} {W // 2} {H // 2}\n"
-            cameratxtlist.append(cameraline)
-            
-            db.add_image(jpgname, camera_id, prior_q=colmapQ, prior_t=T, image_id=i + 1)
-            db.commit()
+    for i in range(len(camera_info.keys())):
+        cameraname = os.path.basename(camera_folders[i])[:-1]  # Remove trailing slash
+        m = camera_info[i][1]
+        colmapR = m[:3, :3]
+        T = m[:3, 3]
+
+        k = camera_info[i][0]
+        
+        
+        colmapQ = rotmat2qvec(colmapR)
+
+        imageid = str(i + 1)
+        cameraid = imageid
+        jpgname = cameraname + ".jpg"  # Handle `.jpg`
+        
+        line = imageid + " "
+        line += " ".join(map(str, colmapQ)) + " "
+        line += " ".join(map(str, T)) + " "
+        line += cameraid + " " + jpgname + "\n"
+        imagetxtlist.append(line)
+        imagetxtlist.append("\n")
+
+        
+        model, width, height, params = i, W, H, np.array((k[0, 0], k[1,1], k[0,2], k[1,2]))
+
+        camera_id = db.add_camera(1, width, height, params)
+        cameraline = f"{i + 1} PINHOLE {width} {height} {k[0, 0]} {k[1,1]} {k[0,2]} {k[1,2]}\n"
+        cameratxtlist.append(cameraline)
+        
+        db.add_image(jpgname, camera_id, prior_q=colmapQ, prior_t=T, image_id=i + 1)
+        db.commit()
+        
 
     db.close()
 
