@@ -45,12 +45,6 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=str, help="output video path")
     args = parser.parse_args()
 
-    seq = args.seq
-    test_camera_ids = args.test_camera_ids
-    train_camera_ids = args.train_camera_ids
-
-    camera_ids = test_camera_ids if args.split == "test" else train_camera_ids
-
     # Own models
     create_videos_from_folder(args.folder, args.output, args.duration)
         
