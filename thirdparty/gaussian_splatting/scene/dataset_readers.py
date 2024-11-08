@@ -980,8 +980,8 @@ def readPanopticColmapInfo(path, images, eval, multiview=False, duration=50):
     if eval:
         # train_cam_infos =  cam_infos[duration:] 
         # test_cam_infos = cam_infos[:duration]
-        train_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid not in [0, 10, 15, 30]]
-        test_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid in [0, 10, 15, 30]]
+        train_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid not in [1, 10, 15, 20]]
+        test_cam_infos = [cam_info for cam_info in cam_infos if cam_info.uid in [1, 10, 15, 20]]
         # uniquecheck = []
         # for cam_info in test_cam_infos:
         #     if cam_info.image_name not in uniquecheck:
@@ -996,7 +996,7 @@ def readPanopticColmapInfo(path, images, eval, multiview=False, duration=50):
         #     assert testname not in sanitycheck
     else:
         train_cam_infos = cam_infos
-        test_cam_infos = cam_infos[:2] #dummy
+        test_cam_infos = cam_infos #dummy
 
     print("Train cam infos: ", len(train_cam_infos))
     print("Test cam infos: ", len(test_cam_infos))
