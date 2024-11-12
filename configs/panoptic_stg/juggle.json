@@ -1,20 +1,15 @@
 {
   "resolution": 1,
   "model": "stg",
-  "scaling_lr": 0.003,
+  "scaling_lr": 0.005,
   "trbfslinit": 4.0,
   "trbfs_lr": 0.05,
-  "preprocesspoints": 0,
-  "save_iterations": [
-    7000,
-    10000,
-    12000,
-    25000,
-    30000
-  ],
+  "preprocesspoints": 3,
   "test_iteration": 12000,
-  "densify": 2,
-  "duration": 50,
-  "rdpip": "train_stg_full",
-  "rgbfunction": "sandwich"
+  "densify": 6,
+  "desicnt": 12,
+  "duration": 150,
+  "rgbfunction": "sandwich",
+  "loader": "colmap_panoptic",
+  "rdpip": "train_stg_full"
 }

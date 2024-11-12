@@ -8,7 +8,7 @@
   "test_iteration": 12000,
   "densify": 6,
   "desicnt": 12,
-  "duration": 50,
+  "duration": 150,
   "rgbfunction": "sandwich",
   "loader": "colmap_panoptic",
   "rdpip": "train_stg_full"
